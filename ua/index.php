@@ -19,6 +19,7 @@
 
 <h3>
 <?php
-    echo "Welcome " . $_SESSION['username'] . ' | <a href="sistem.php?op=out">Log Out</a>';
+    echo "Welcome " . $_SESSION['username'] . ' | <a href="sistem.php?op=out">Log Out</a>' . ' | <a href="curd_prodi.php">Tabel Prodi</a>'
+    . ' | <a href="curd_user.php">Tabel User</a>' . ' | <a href="curd_mahasiswa.php">Tabel Mahasiswa</a>';
 ?>
 </h3>
