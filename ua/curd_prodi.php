@@ -172,7 +172,7 @@
         session_start();
 
         // Check if the user is logged in and has the required permissions
-        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '01' || $_SESSION['level'] !== '10') {
+        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '1' || $_SESSION['level'] !== '10') {
             header("location: login.php"); // Redirect to login page
             exit;
         }
