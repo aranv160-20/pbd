@@ -169,199 +169,201 @@
 <body>
     <div class="container">
     <?php
-session_start();
+        session_start();
 
-// Pastikan bahwa hanya pengguna dengan jenisuser = '01' dan level = '10' yang dapat mengakses CURD 'PRODI'
-if (!isset($_SESSION['username'])) {
-    header("location: login.php"); // Ganti dengan halaman login Anda
-    exit;
-}
+        // Check if the user is logged in and has the required permissions
+        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '01' || $_SESSION['level'] !== '10') {
+            header("location: login.php"); // Redirect to login page
+            exit;
+        }
 
-require("../sistem/koneksi.php");
-$hub = open_connection();
-$a = isset($_GET["a"]) ? $_GET["a"] : '';
-$id = isset($_GET["id"]) ? $_GET["id"] : '';
-$sql = isset($_POST["sql"]) ? $_POST["sql"] : '';
+        require("../sistem/koneksi.php");
+        $hub = open_connection();
+        $a = isset($_GET["a"]) ? $_GET["a"] : '';
+        $id = isset($_GET["id"]) ? $_GET["id"] : '';
+        $sql = isset($_POST["sql"]) ? $_POST["sql"] : '';
 
-switch ($sql) {
-    case "create":
-        create_prodi();
-        break;
-    case "update":
-        update_prodi();
-        break;
-    case "delete":
-        delete_prodi();
-        break;
-}
+        // Handle CRUD operations
+        switch ($sql) {
+            case "create":
+                create_prodi();
+                break;
+            case "update":
+                update_prodi();
+                break;
+            case "delete":
+                delete_prodi();
+                break;
+        }
 
-switch ($a) {
-    case "list":
-        read_data();
-        break;
-    case "input":
-        input_data();
-        break;
-    case "edit":
-        edit_data($id);
-        break;
-    case "hapus":
-        hapus_data($id);
-        break;
-    default:
-        read_data();
-        break;
-}
+        // Handle actions based on the 'a' parameter
+        switch ($a) {
+            case "list":
+                read_data();
+                break;
+            case "input":
+                input_data();
+                break;
+            case "edit":
+                edit_data($id);
+                break;
+            case "hapus":
+                hapus_data($id);
+                break;
+            default:
+                read_data();
+                break;
+        }
 
-mysqli_close($hub);
+        mysqli_close($hub);
 
-function read_data() {
-    global $hub;
-    $query = "SELECT * FROM dt_prodi";
-    $result = mysqli_query($hub, $query);
-    ?>
-    <h2>Read Data Program Studi</h2>
-    <table border=1 cellpadding=2>
-    <tr><td colspan="5">
-    <a href="curd_prodi.php?a=input">INPUT</a>
-    </td></tr>
-    <tr>
-        <td>ID</td>
-        <td>KODE</td>
-        <td>NAMA PRODI</td>
-        <td>AKREDITASI</td>
-        <td>AKSI</td></tr>
-    <?php
-    while($row = mysqli_fetch_array($result)) {
+        function read_data() {
+        global $hub;
+        $query = "SELECT * FROM dt_prodi";
+        $result = mysqli_query($hub, $query);
         ?>
+        <h2>Read Data Program Studi</h2>
+        <table border=1 cellpadding=2>
+        <tr><td colspan="5">
+        <a href="curd_prodi.php?a=input">INPUT</a>
+        </td></tr>
         <tr>
-        <td><?php echo $row['idprodi']; ?></td>
-        <td><?php echo $row['kdprodi']; ?></td>
-        <td><?php echo $row['nmprodi']; ?></td>
-        <td><?php echo $row['akreditasi']; ?></td>
-        <td>
-        <a href="curd_prodi.php?a=edit&id=<?php echo $row['idprodi']; ?>">EDIT</a>
-        <a href="curd_prodi.php?a=hapus&id=<?php echo $row['idprodi']; ?>">HAPUS</a>
-        </td>
-        </tr>
+            <td>ID</td>
+            <td>KODE</td>
+            <td>NAMA PRODI</td>
+            <td>AKREDITASI</td>
+            <td>AKSI</td></tr>
+        <?php
+        while($row = mysqli_fetch_array($result)) {
+            ?>
+            <tr>
+            <td><?php echo $row['idprodi']; ?></td>
+            <td><?php echo $row['kdprodi']; ?></td>
+            <td><?php echo $row['nmprodi']; ?></td>
+            <td><?php echo $row['akreditasi']; ?></td>
+            <td>
+            <a href="curd_prodi.php?a=edit&id=<?php echo $row['idprodi']; ?>">EDIT</a>
+            <a href="curd_prodi.php?a=hapus&id=<?php echo $row['idprodi']; ?>">HAPUS</a>
+            </td>
+            </tr>
+            <?php
+        }
+        ?>
+        </table>
         <?php
     }
+    function input_data() {
+        $row = array(
+            "kdprodi" => "",
+            "nmprodi" => "",
+            "akreditasi" => "-"
+        );
+        ?>
+        <h2>Input Data Program Studi</h2>
+        <form action="curd_prodi.php?a=list" method="post" class="form-input">
+        <input type="hidden" name="sql" value="create">
+        <label for="kdprodi">Kode Prodi:</label>
+        <input type="text" name="kdprodi" id="kdprodi" maxlength="6" size="6" value="<?php echo htmlspecialchars(trim($row["kdprodi"])); ?>" required /><br>
+        <label for="nmprodi">Nama Prodi:</label>
+        <input type="text" name="nmprodi" id="nmprodi" maxlength="70" size="70" value="<?php echo htmlspecialchars(trim($row["nmprodi"])); ?>" required /><br>
+        <label>Akreditasi Prodi:</label>
+        <input type="radio" name="akreditasi" value="-" <?php if($row["akreditasi"] == '-' || $row["akreditasi"] == '') { echo "checked"; } ?>>
+        -
+        <input type="radio" name="akreditasi" value="A" <?php if($row["akreditasi"] == 'A') { echo "checked"; } ?>>
+        A
+        <input type="radio" name="akreditasi" value="B" <?php if($row["akreditasi"] == 'B') { echo "checked"; } ?>>
+        B
+        <input type="radio" name="akreditasi" value="C" <?php if($row["akreditasi"] == 'C') { echo "checked"; } ?>>
+        C
+        <br><input type="submit" name="action" value="Simpan">
+        <a href="curd_prodi.php?a=list">Batal</a>
+        </form>
+        <?php
+    }
+
+    function edit_data($id) {
+        global $hub;
+        $query = "SELECT * FROM dt_prodi WHERE idprodi = $id";
+        $result = mysqli_query($hub, $query);
+        $row = mysqli_fetch_array($result);
+        ?>
+        <h2>Edit Data Program Studi</h2>
+        <form action="curd_prodi.php?a=list" method="post" class="form-input">
+        <input type="hidden" name="sql" value="update">
+        <input type="hidden" name="idprodi" value="<?php echo htmlspecialchars($id); ?>">
+        <label for="kdprodi">Kode Prodi:</label>
+        <input type="text" name="kdprodi" id="kdprodi" maxlength="6" size="6" value="<?php echo htmlspecialchars($row["kdprodi"]); ?>" required /><br>
+        <label for="nmprodi">Nama Prodi:</label>
+        <input type="text" name="nmprodi" id="nmprodi" maxlength="70" size="70" value="<?php echo htmlspecialchars($row["nmprodi"]); ?>" required /><br>
+        <label>Akreditasi Prodi:</label>
+        <input type="radio" name="akreditasi" value="-" <?php if($row["akreditasi"] == '-' || $row["akreditasi"] == '') { echo "checked"; } ?>>
+        -
+        <input type="radio" name="akreditasi" value="A" <?php if($row["akreditasi"] == 'A') { echo "checked"; } ?>>
+        A
+        <input type="radio" name="akreditasi" value="B" <?php if($row["akreditasi"] == 'B') { echo "checked"; } ?>>
+        B
+        <input type="radio" name="akreditasi" value="C" <?php if($row["akreditasi"] == 'C') { echo "checked"; } ?>>
+        C
+        <br><input type="submit" name="action" value="Simpan">
+        <a href="curd_prodi.php?a=list">Batal</a>
+        </form>
+        <?php
+    }
+
+    function hapus_data($id) {
+        global $hub;
+        $query = "SELECT * FROM dt_prodi WHERE idprodi = $id";
+        $result = mysqli_query($hub, $query);
+        $row = mysqli_fetch_array($result);
+        ?>
+        <h2>Hapus Data Program Studi</h2>
+        <form action="curd_prodi.php?a=list" method="post" class="form-input">
+        <input type="hidden" name="sql" value="delete">
+        <input type="hidden" name="idprodi" value="<?php echo htmlspecialchars($id); ?>">
+        <table>
+        <tr><td width=100>Kode</td><td><?php echo htmlspecialchars($row["kdprodi"]); ?></td></tr>
+        <tr><td>Nama Prodi</td><td><?php echo htmlspecialchars($row["nmprodi"]); ?></td></tr>
+        <tr><td>Akreditasi</td><td><?php echo htmlspecialchars($row["akreditasi"]); ?></td></tr>
+        </table>
+        <br><input type="submit" name="action" value="Hapus">
+        <a href="curd_prodi.php?a=list">Batal</a>
+        </form>
+        <?php
+    }
+
+    function create_prodi() {
+        global $hub;
+        global $_POST;
+        $kdprodi = mysqli_real_escape_string($hub, $_POST["kdprodi"]);
+        $nmprodi = mysqli_real_escape_string($hub, $_POST["nmprodi"]);
+        $akreditasi = mysqli_real_escape_string($hub, $_POST["akreditasi"]);
+
+        $query  = "INSERT INTO `dt_prodi` (`kdprodi`, `nmprodi`, `akreditasi`) VALUES ";
+        $query .= "('$kdprodi', '$nmprodi', '$akreditasi')";
+        mysqli_query($hub, $query) or die(mysqli_error($hub));
+    }
+
+    function update_prodi() {
+        global $hub;
+        global $_POST;
+        $idprodi = mysqli_real_escape_string($hub, $_POST["idprodi"]);
+        $kdprodi = mysqli_real_escape_string($hub, $_POST["kdprodi"]);
+        $nmprodi = mysqli_real_escape_string($hub, $_POST["nmprodi"]);
+        $akreditasi = mysqli_real_escape_string($hub, $_POST["akreditasi"]);
+
+        $query  = "UPDATE `dt_prodi` SET kdprodi='$kdprodi', nmprodi='$nmprodi', akreditasi='$akreditasi' WHERE idprodi=$idprodi";
+        mysqli_query($hub, $query) or die(mysqli_error($hub));
+    }
+
+    function delete_prodi() {
+        global $hub;
+        global $_POST;
+        $idprodi = mysqli_real_escape_string($hub, $_POST["idprodi"]);
+
+        $query  = "DELETE FROM `dt_prodi` WHERE idprodi=$idprodi";
+        mysqli_query($hub, $query) or die(mysqli_error($hub));
+    }
     ?>
-    </table>
-    <?php
-}
-function input_data() {
-    $row = array(
-        "kdprodi" => "",
-        "nmprodi" => "",
-        "akreditasi" => "-"
-    );
-    ?>
-    <h2>Input Data Program Studi</h2>
-    <form action="curd_prodi.php?a=list" method="post" class="form-input">
-    <input type="hidden" name="sql" value="create">
-    <label for="kdprodi">Kode Prodi:</label>
-    <input type="text" name="kdprodi" id="kdprodi" maxlength="6" size="6" value="<?php echo htmlspecialchars(trim($row["kdprodi"])); ?>" required /><br>
-    <label for="nmprodi">Nama Prodi:</label>
-    <input type="text" name="nmprodi" id="nmprodi" maxlength="70" size="70" value="<?php echo htmlspecialchars(trim($row["nmprodi"])); ?>" required /><br>
-    <label>Akreditasi Prodi:</label>
-    <input type="radio" name="akreditasi" value="-" <?php if($row["akreditasi"] == '-' || $row["akreditasi"] == '') { echo "checked"; } ?>>
-    -
-    <input type="radio" name="akreditasi" value="A" <?php if($row["akreditasi"] == 'A') { echo "checked"; } ?>>
-    A
-    <input type="radio" name="akreditasi" value="B" <?php if($row["akreditasi"] == 'B') { echo "checked"; } ?>>
-    B
-    <input type="radio" name="akreditasi" value="C" <?php if($row["akreditasi"] == 'C') { echo "checked"; } ?>>
-    C
-    <br><input type="submit" name="action" value="Simpan">
-    <a href="curd_prodi.php?a=list">Batal</a>
-    </form>
-    <?php
-}
-
-function edit_data($id) {
-    global $hub;
-    $query = "SELECT * FROM dt_prodi WHERE idprodi = $id";
-    $result = mysqli_query($hub, $query);
-    $row = mysqli_fetch_array($result);
-    ?>
-    <h2>Edit Data Program Studi</h2>
-    <form action="curd_prodi.php?a=list" method="post" class="form-input">
-    <input type="hidden" name="sql" value="update">
-    <input type="hidden" name="idprodi" value="<?php echo htmlspecialchars($id); ?>">
-    <label for="kdprodi">Kode Prodi:</label>
-    <input type="text" name="kdprodi" id="kdprodi" maxlength="6" size="6" value="<?php echo htmlspecialchars($row["kdprodi"]); ?>" required /><br>
-    <label for="nmprodi">Nama Prodi:</label>
-    <input type="text" name="nmprodi" id="nmprodi" maxlength="70" size="70" value="<?php echo htmlspecialchars($row["nmprodi"]); ?>" required /><br>
-    <label>Akreditasi Prodi:</label>
-    <input type="radio" name="akreditasi" value="-" <?php if($row["akreditasi"] == '-' || $row["akreditasi"] == '') { echo "checked"; } ?>>
-    -
-    <input type="radio" name="akreditasi" value="A" <?php if($row["akreditasi"] == 'A') { echo "checked"; } ?>>
-    A
-    <input type="radio" name="akreditasi" value="B" <?php if($row["akreditasi"] == 'B') { echo "checked"; } ?>>
-    B
-    <input type="radio" name="akreditasi" value="C" <?php if($row["akreditasi"] == 'C') { echo "checked"; } ?>>
-    C
-    <br><input type="submit" name="action" value="Simpan">
-    <a href="curd_prodi.php?a=list">Batal</a>
-    </form>
-    <?php
-}
-
-function hapus_data($id) {
-    global $hub;
-    $query = "SELECT * FROM dt_prodi WHERE idprodi = $id";
-    $result = mysqli_query($hub, $query);
-    $row = mysqli_fetch_array($result);
-    ?>
-    <h2>Hapus Data Program Studi</h2>
-    <form action="curd_prodi.php?a=list" method="post" class="form-input">
-    <input type="hidden" name="sql" value="delete">
-    <input type="hidden" name="idprodi" value="<?php echo htmlspecialchars($id); ?>">
-    <table>
-    <tr><td width=100>Kode</td><td><?php echo htmlspecialchars($row["kdprodi"]); ?></td></tr>
-    <tr><td>Nama Prodi</td><td><?php echo htmlspecialchars($row["nmprodi"]); ?></td></tr>
-    <tr><td>Akreditasi</td><td><?php echo htmlspecialchars($row["akreditasi"]); ?></td></tr>
-    </table>
-    <br><input type="submit" name="action" value="Hapus">
-    <a href="curd_prodi.php?a=list">Batal</a>
-    </form>
-    <?php
-}
-
-function create_prodi() {
-    global $hub;
-    global $_POST;
-    $kdprodi = mysqli_real_escape_string($hub, $_POST["kdprodi"]);
-    $nmprodi = mysqli_real_escape_string($hub, $_POST["nmprodi"]);
-    $akreditasi = mysqli_real_escape_string($hub, $_POST["akreditasi"]);
-
-    $query  = "INSERT INTO `dt_prodi` (`kdprodi`, `nmprodi`, `akreditasi`) VALUES ";
-    $query .= "('$kdprodi', '$nmprodi', '$akreditasi')";
-    mysqli_query($hub, $query) or die(mysqli_error($hub));
-}
-
-function update_prodi() {
-    global $hub;
-    global $_POST;
-    $idprodi = mysqli_real_escape_string($hub, $_POST["idprodi"]);
-    $kdprodi = mysqli_real_escape_string($hub, $_POST["kdprodi"]);
-    $nmprodi = mysqli_real_escape_string($hub, $_POST["nmprodi"]);
-    $akreditasi = mysqli_real_escape_string($hub, $_POST["akreditasi"]);
-
-    $query  = "UPDATE `dt_prodi` SET kdprodi='$kdprodi', nmprodi='$nmprodi', akreditasi='$akreditasi' WHERE idprodi=$idprodi";
-    mysqli_query($hub, $query) or die(mysqli_error($hub));
-}
-
-function delete_prodi() {
-    global $hub;
-    global $_POST;
-    $idprodi = mysqli_real_escape_string($hub, $_POST["idprodi"]);
-
-    $query  = "DELETE FROM `dt_prodi` WHERE idprodi=$idprodi";
-    mysqli_query($hub, $query) or die(mysqli_error($hub));
-}
-?>
     </div>
 </body>
 
