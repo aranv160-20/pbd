@@ -172,6 +172,11 @@
     <div class="container">
 
         <?php
+        // Check if the user is logged in and has the required permissions
+        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '01' || $_SESSION['level'] !== '11') {
+            header("location: login.php"); // Redirect to login page
+            exit;
+        }
         require("../sistem/koneksi.php");
         $hub = open_connection();
         $a = isset($_GET["a"]) ? $_GET["a"] : '';
