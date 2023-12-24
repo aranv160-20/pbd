@@ -171,9 +171,9 @@
     <?php
         session_start();
 
-        // Check if the user is logged in and has the required permissions
-        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '1' || $_SESSION['level'] !== '10') {
-            header("location: login.php"); // Redirect to login page
+        // Check if the user is logged in with appropriate credentials
+        if (!isset($_SESSION['username']) || ($_SESSION['jenisuser'] !== '1' && $_SESSION['level'] !== '10')) {
+            header("location: login.php"); // Redirect to the login page
             exit;
         }
 
@@ -183,20 +183,18 @@
         $id = isset($_GET["id"]) ? $_GET["id"] : '';
         $sql = isset($_POST["sql"]) ? $_POST["sql"] : '';
 
-        // Handle CRUD operations
         switch ($sql) {
             case "create":
-                create_prodi();
+                create_user();
                 break;
             case "update":
-                update_prodi();
+                update_user();
                 break;
             case "delete":
-                delete_prodi();
+                delete_user();
                 break;
         }
 
-        // Handle actions based on the 'a' parameter
         switch ($a) {
             case "list":
                 read_data();
@@ -217,11 +215,13 @@
 
         mysqli_close($hub);
 
-        function read_data() {
-        global $hub;
-        $query = "SELECT * FROM dt_prodi";
-        $result = mysqli_query($hub, $query);
+        function read_data()
+        {
+            global $hub;
+            $query = "SELECT * FROM dt_prodi";
+            $result = mysqli_query($hub, $query);
         ?>
+
         <h2>Read Data Program Studi</h2>
         <table border=1 cellpadding=2>
         <tr><td colspan="5">
