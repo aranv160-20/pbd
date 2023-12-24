@@ -1,10 +1,9 @@
-
 <?php
         session_start();
 
-        // Check if the user is logged in and has the required permissions
-        if (!isset($_SESSION['username']) || $_SESSION['jenisuser'] !== '1' || $_SESSION['level'] !== '11') {
-            header("location: login.php"); // Redirect to login page
+        // Check if the user is logged in with appropriate credentials
+        if (!isset($_SESSION['username']) || ($_SESSION['jenisuser'] !== '1' && $_SESSION['level'] !== '11')) {
+            header("location: login.php"); // Redirect to the login page
             exit;
         }
 
@@ -14,20 +13,18 @@
         $id = isset($_GET["id"]) ? $_GET["id"] : '';
         $sql = isset($_POST["sql"]) ? $_POST["sql"] : '';
 
-        // Handle CRUD operations
         switch ($sql) {
             case "create":
-                create_mahasiswa();
+                create_user();
                 break;
             case "update":
-                update_mahasiswa();
+                update_user();
                 break;
             case "delete":
-                delete_mahasiswa();
+                delete_user();
                 break;
         }
 
-        // Handle actions based on the 'a' parameter
         switch ($a) {
             case "list":
                 read_data();
@@ -53,7 +50,7 @@
             global $hub;
             $query = "SELECT * FROM mahasiswa";
             $result = mysqli_query($hub, $query);
-            ?>
+        ?>
 
 <!DOCTYPE html>
 <html lang="en">
